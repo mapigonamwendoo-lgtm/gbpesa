@@ -417,7 +417,41 @@ document
       );
 
       return;
-    }
+    }const { error: walletError } =
+await supabaseClient
+  .from("wallets")
+  .insert({
+    user_id: data.user.id,
+    balance: 0,
+    gb_balance: 0
+  });
+
+if (walletError) {
+
+  showMessage(
+    "Profile imetengenezwa lakini wallet haikuweza kutengenezwa.",
+    "error"
+  );
+
+  return;
+  } const { error: walletError } =
+await supabaseClient
+  .from("wallets")
+  .insert({
+    user_id: data.user.id,
+    balance: 0,
+    gb_balance: 0
+  });
+
+if (walletError) {
+
+  showMessage(
+    "Profile imetengenezwa lakini wallet haikuweza kutengenezwa.",
+    "error"
+  );
+
+  return;
+}
   }
 
   showMessage(
