@@ -5,36 +5,28 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GB Pesa</title>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <style>
     * {
       box-sizing: border-box;
-      margin: 0;
-      padding: 0;
       font-family: Arial, sans-serif;
     }
 
     body {
+      margin: 0;
       background: #f5f7fb;
-      color: #222;
     }
 
     header {
-      background: #0b7a4b;
+      background: #087f4e;
       color: white;
-      padding: 20px;
       text-align: center;
-    }
-
-    header h1 {
-      font-size: 30px;
-    }
-
-    header p {
-      margin-top: 8px;
+      padding: 25px;
     }
 
     .container {
-      max-width: 500px;
+      max-width: 450px;
       margin: 30px auto;
       padding: 20px;
     }
@@ -42,93 +34,182 @@
     .card {
       background: white;
       padding: 25px;
-      margin-bottom: 20px;
       border-radius: 15px;
-      box-shadow: 0 3px 12px rgba(0,0,0,0.08);
-      text-align: center;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 15px rgba(0,0,0,.08);
     }
 
-    .card h2 {
-      margin-bottom: 10px;
+    h2 {
+      margin-top: 0;
     }
 
-    .btn {
-      display: inline-block;
-      background: #0b7a4b;
-      color: white;
-      padding: 13px 25px;
-      border-radius: 8px;
-      text-decoration: none;
-      margin-top: 15px;
-    }
-
-    .packages {
-      display: grid;
-      gap: 12px;
-      margin-top: 15px;
-    }
-
-    .package {
+    input {
+      width: 100%;
+      padding: 13px;
+      margin: 8px 0;
       border: 1px solid #ddd;
-      padding: 15px;
-      border-radius: 10px;
+      border-radius: 8px;
     }
 
-    footer {
+    button {
+      width: 100%;
+      padding: 13px;
+      margin-top: 10px;
+      border: 0;
+      border-radius: 8px;
+      background: #087f4e;
+      color: white;
+      font-size: 16px;
+    }
+
+    button.secondary {
+      background: #555;
+    }
+
+    #message {
+      margin-top: 15px;
       text-align: center;
-      padding: 25px;
-      color: #777;
+      font-weight: bold;
     }
   </style>
 </head>
 
 <body>
 
-  <header>
-    <h1>GB Pesa</h1>
-    <p>Nunua na simamia vifurushi vyako vya GB</p>
-  </header>
+<header>
+  <h1>GB Pesa</h1>
+  <p>Nunua na simamia GB zako</p>
+</header>
 
-  <div class="container">
+<div class="container">
 
-    <div class="card">
-      <h2>Karibu GB Pesa</h2>
-      <p>Jukwaa lako la kusimamia vifurushi vya data.</p>
+  <div class="card">
+    <h2>Jisajili</h2>
 
-      <a href="#" class="btn">Jisajili / Ingia</a>
-    </div>
+    <input id="signupName" type="text" placeholder="Jina lako">
+    <input id="signupPhone" type="tel" placeholder="Namba ya simu">
+    <input id="signupEmail" type="email" placeholder="Email">
+    <input id="signupPassword" type="password" placeholder="Password">
 
-    <div class="card">
-      <h2>Vifurushi vya GB</h2>
-
-      <div class="packages">
-
-        <div class="package">
-          <h3>GB 1</h3>
-          <p>TSh 1,000</p>
-          <a href="#" class="btn">Nunua</a>
-        </div>
-
-        <div class="package">
-          <h3>GB 5</h3>
-          <p>TSh 4,500</p>
-          <a href="#" class="btn">Nunua</a>
-        </div>
-
-        <div class="package">
-          <h3>GB 10</h3>
-          <p>TSh 8,000</p>
-          <a href="#" class="btn">Nunua</a>
-        </div>
-
-      </div>
-    </div>
-
+    <button onclick="signUp()">Jisajili</button>
   </div>
 
-  <footer>
-    © 2026 GB Pesa
-  </footer>
+  <div class="card">
+    <h2>Ingia</h2>
+
+    <input id="loginEmail" type="email" placeholder="Email">
+    <input id="loginPassword" type="password" placeholder="Password">
+
+    <button onclick="login()">Ingia</button>
+  </div>
+
+  <div id="message"></div>
+
+</div>
+
+<script>
+
+const SUPABASE_URL = "https://zkyojgwsbvqkykbdzyjl.supabase.co";
+
+/*
+  WEKA PUBLISHABLE KEY YAKO HAPA
+  Usitumie Secret key.
+*/
+const SUPABASE_KEY = "WEKA_PUBLISHABLE_KEY_HAPA";
+
+const supabaseClient =
+  window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
+
+async function signUp() {
+
+  const name =
+    document.getElementById("signupName").value;
+
+  const phone =
+    document.getElementById("signupPhone").value;
+
+  const email =
+    document.getElementById("signupEmail").value;
+
+  const password =
+    document.getElementById("signupPassword").value;
+
+  if (!email || !password) {
+    showMessage("Weka email na password.");
+    return;
+  }
+
+  const { data, error } =
+    await supabaseClient.auth.signUp({
+      email: email,
+      password: password
+    });
+
+  if (error) {
+    showMessage(error.message);
+    return;
+  }
+
+  if (data.user) {
+
+    const { error: profileError } =
+      await supabaseClient
+        .from("profiles")
+        .insert({
+          id: data.user.id,
+          full_name: name,
+          phone: phone,
+          referral_code:
+            "GBP" +
+            data.user.id
+              .replaceAll("-", "")
+              .substring(0, 8)
+              .toUpperCase()
+        });
+
+    if (profileError) {
+      showMessage(
+        "Account imetengenezwa lakini profile haikuweza kuhifadhiwa."
+      );
+      return;
+    }
+  }
+
+  showMessage(
+    "Usajili umefanikiwa! Sasa unaweza kuingia."
+  );
+}
+
+async function login() {
+
+  const email =
+    document.getElementById("loginEmail").value;
+
+  const password =
+    document.getElementById("loginPassword").value;
+
+  const { error } =
+    await supabaseClient.auth.signInWithPassword({
+      email: email,
+      password: password
+    });
+
+  if (error) {
+    showMessage(error.message);
+    return;
+  }
+
+  showMessage("Umeingia kikamilifu!");
+}
+
+function showMessage(text) {
+  document.getElementById("message").innerText = text;
+}
+
+</script>
 
 </body>
-  </html>
+      </html>
