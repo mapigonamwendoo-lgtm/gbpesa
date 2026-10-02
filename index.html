@@ -548,7 +548,83 @@ document
   );
 
 });
+async function loadDashboard() {
 
+  const {
+    data: {
+      user
+    }
+  } = await supabaseClient.auth.getUser();
+
+  if (!user) {
+    return;
+  }
+
+  // Tafuta profile
+  const {
+    data: profile
+  } = await supabaseClient
+    .from("profiles")
+    .select("full_name, referral_code")
+    .eq("id", user.id)
+    .single();
+
+  // Tafuta wallet
+  const {
+    data: wallet
+  } = await supabaseClient
+    .from("wallets")
+    .select("balance, gb_balance")
+    .eq("user_id", user.id)
+    .single();
+
+  if (profile) {
+
+    document.getElementById("userName").innerText =
+      profile.full_name || "Mtumiaji";
+
+    document.getElementById("referralCode").innerText =
+      profile.referral_code || "-";
+  }
+
+  if (wallet) {
+
+    document.getElementById("walletBalance").innerText =
+      Number(wallet.balance || 0).toLocaleString();
+
+    document.getElementById("gbBalance").innerText =
+      Number(wallet.gb_balance || 0);
+  }
+
+  document.getElementById("dashboard").style.display =
+    "block";
+}
+
+
+// LOGOUT
+
+document
+  .getElementById("logoutBtn")
+  .addEventListener("click", async function () {
+
+    await supabaseClient.auth.signOut();
+
+    location.reload();
+
+  });
+
+
+// Angalia kama user ameingia
+
+supabaseClient.auth.onAuthStateChange(
+  async (event, session) => {
+
+    if (session) {
+      await loadDashboard();
+    }
+
+  }
+);
 </script>
 
 </body>
